@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NVC Practice</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__content">
+      <div class="language-switcher">
+        <label for="language-selector" data-i18n="languageLabel">Language</label>
+        <select id="language-selector">
+          <option value="en">🇬🇧 English</option>
+          <option value="fr">🇫🇷 Français</option>
+          <option value="de">🇩🇪 Deutsch</option>
+          <option value="it">🇮🇹 Italiano</option>
+          <option value="vi">🇻🇳 Tiếng Việt</option>
+        </select>
+      </div>
+      <h1 data-i18n="title">Non-Violent Communication</h1>
+      <p data-i18n="intro">Learn Marshall Rosenberg's NVC process and practice building compassionate, clear messages.</p>
+      <a href="#practice" id="start-button" class="button" data-i18n="startButton">Start Practicing</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="section intro">
+      <h2 data-i18n="componentsHeading">The Four NVC Components</h2>
+      <div class="cards">
+        <article class="card">
+          <h3 data-i18n="componentObservation">1. Observation</h3>
+          <p data-i18n="componentObservationText">Describe what happened without judgment or interpretation.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="componentFeeling">2. Feeling</h3>
+          <p data-i18n="componentFeelingText">Share how you feel in response to the observation.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="componentNeed">3. Need</h3>
+          <p data-i18n="componentNeedText">Connect your feeling to an unmet need or value.</p>
+        </article>
+        <article class="card">
+          <h3 data-i18n="componentRequest">4. Request</h3>
+          <p data-i18n="componentRequestText">Ask for a clear, positive action to meet your need.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section example">
+      <h2 data-i18n="exampleHeading">Example</h2>
+      <p><strong data-i18n="exampleObservationLabel">Observation:</strong> <span data-i18n="exampleObservationText">When I saw the report arrive late...</span></p>
+      <p><strong data-i18n="exampleFeelingLabel">Feeling:</strong> <span data-i18n="exampleFeelingText">I felt stressed and frustrated.</span></p>
+      <p><strong data-i18n="exampleNeedLabel">Need:</strong> <span data-i18n="exampleNeedText">I need reliability and timely communication.</span></p>
+      <p><strong data-i18n="exampleRequestLabel">Request:</strong> <span data-i18n="exampleRequestText">Would you be willing to send me an update sooner next time?</span></p>
+    </section>
+
+    <section id="practice" class="section practice">
+      <div class="practice__intro">
+        <h2 data-i18n="practiceHeading">Practice your own NVC statement</h2>
+        <p data-i18n-html="practiceInstructions">Fill in the fields and click <strong>Build Statement</strong> for a compassionate, structured response.</p>
+      </div>
+
+      <form id="nvc-form" class="practice__form">
+        <label>
+          <span data-i18n="labelObservation">Observation</span>
+          <textarea id="observation" data-i18n-placeholder="observationPlaceholder" placeholder="What did you see or hear?" rows="3"></textarea>
+        </label>
+        <label>
+          <span data-i18n="labelFeeling">Feeling</span>
+          <input id="feeling" type="text" data-i18n-placeholder="feelingPlaceholder" placeholder="How do you feel?" />
+        </label>
+        <label>
+          <span data-i18n="labelNeed">Need</span>
+          <input id="need" type="text" data-i18n-placeholder="needPlaceholder" placeholder="What need or value is present?" />
+        </label>
+        <label>
+          <span data-i18n="labelRequest">Request</span>
+          <input id="request" type="text" data-i18n-placeholder="requestPlaceholder" placeholder="What would you like to ask for?" />
+        </label>
+
+        <button type="button" id="build-button" class="button" data-i18n="buildButton">Build Statement</button>
+      </form>
+
+      <div class="practice__result">
+        <h3 data-i18n="resultHeading">Your NVC statement</h3>
+        <pre id="result" data-i18n="resultDefault">Complete all fields to see your statement.</pre>
+      </div>
+    </section>
+
+    <section class="section tips">
+      <h2 data-i18n="tipsHeading">Tips for compassionate communication</h2>
+      <ul>
+        <li data-i18n="tip1">Focus on observations, not evaluations.</li>
+        <li data-i18n="tip2">Express feelings honestly, without blaming.</li>
+        <li data-i18n="tip3">Connect to needs rather than demands.</li>
+        <li data-i18n="tip4">Phrase requests positively and clearly.</li>
+      </ul>
+    </section>
+  </main>
+
+  <section class="section qr-section">
+    <h2 data-i18n="shareHeading">Share this page</h2>
+    <p data-i18n="shareText">Scan this QR code to open this practice page on another device.</p>
+    <div class="qr-code-wrapper">
+      <div id="qr-code" class="qr-code"></div>
+      <div class="qr-url" id="qr-url"></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p data-i18n="footerText">Built for learning NVC with an easy web practice tool.</p>
+  </footer>
+
+  <script src="qrcode.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
