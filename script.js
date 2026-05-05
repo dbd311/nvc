@@ -53,6 +53,10 @@ const translations = {
     tip4: 'Phrase requests positively and clearly.',
     shareHeading: 'Share this page',
     shareText: 'Scan this QR code to open this practice page on another device.',
+    shareButtonsLabel: 'Share this page on social networks',
+    shareWhatsApp: 'WhatsApp',
+    shareFacebook: 'Facebook',
+    shareLinkedIn: 'LinkedIn',
     footerText: 'Built for learning NVC with an easy web practice tool.',
     qrUnavailable: 'QR code generator unavailable. Please refresh or check your connection.',
     statementTemplate: 'When {observation},\nI feel {feeling} because I need {need}.\nWould you be willing to {request}?',
@@ -103,6 +107,10 @@ const translations = {
     tip4: 'Formulez des demandes positives et claires.',
     shareHeading: 'Partager cette page',
     shareText: 'Scannez ce QR code pour ouvrir cette page sur un autre appareil.',
+    shareButtonsLabel: 'Partager cette page sur les réseaux sociaux',
+    shareWhatsApp: 'WhatsApp',
+    shareFacebook: 'Facebook',
+    shareLinkedIn: 'LinkedIn',
     footerText: 'Conçu pour apprendre la CNV avec un outil de pratique facile.',
     qrUnavailable: 'Générateur de QR code indisponible. Actualisez ou vérifiez votre connexion.',
     statementTemplate: 'Quand {observation},\nJe ressens {feeling} parce que j’ai besoin de {need}.\nSeriez-vous prêt(e) à {request} ?',
@@ -153,6 +161,10 @@ const translations = {
     tip4: 'Diễn đạt yêu cầu một cách tích cực và rõ ràng.',
     shareHeading: 'Chia sẻ trang này',
     shareText: 'Quét mã QR để mở trang này trên thiết bị khác.',
+    shareButtonsLabel: 'Chia sẻ trang này trên mạng xã hội',
+    shareWhatsApp: 'WhatsApp',
+    shareFacebook: 'Facebook',
+    shareLinkedIn: 'LinkedIn',
     footerText: 'Xây dựng để học NVC với một công cụ luyện tập dễ dùng.',
     qrUnavailable: 'Trình tạo mã QR hiện không khả dụng. Vui lòng làm mới hoặc kiểm tra kết nối.',
     statementTemplate: 'Khi {observation},\nTôi cảm thấy {feeling} vì tôi cần {need}.\nBạn có thể {request} không?',
@@ -203,6 +215,10 @@ const translations = {
     tip4: 'Formuliere Bitten positiv und klar.',
     shareHeading: 'Teile diese Seite',
     shareText: 'Scanne diesen QR-Code, um diese Seite auf einem anderen Gerät zu öffnen.',
+    shareButtonsLabel: 'Diese Seite in sozialen Netzwerken teilen',
+    shareWhatsApp: 'WhatsApp',
+    shareFacebook: 'Facebook',
+    shareLinkedIn: 'LinkedIn',
     footerText: 'Entwickelt, um NVC mit einem einfachen Übungswerkzeug zu lernen.',
     qrUnavailable: 'QR-Code-Generator nicht verfügbar. Bitte aktualisiere oder prüfe deine Verbindung.',
     statementTemplate: 'Wenn {observation},\nich fühle mich {feeling}, weil ich {need} brauche.\nWärst du bereit, {request}?',
@@ -253,6 +269,10 @@ const translations = {
     tip4: 'Formula le richieste in modo positivo e chiaro.',
     shareHeading: 'Condividi questa pagina',
     shareText: 'Scansiona questo QR code per aprire questa pagina su un altro dispositivo.',
+    shareButtonsLabel: 'Condividi questa pagina sui social network',
+    shareWhatsApp: 'WhatsApp',
+    shareFacebook: 'Facebook',
+    shareLinkedIn: 'LinkedIn',
     footerText: 'Creato per imparare la NVC con uno strumento di esercizio semplice.',
     qrUnavailable: 'Generatore di QR code non disponibile. Aggiorna o controlla la connessione.',
     statementTemplate: 'Quando {observation},\nmi sento {feeling} perché ho bisogno di {need}.\nSaresti disposto a {request}?',
@@ -282,6 +302,11 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
     const translationKey = element.dataset.i18nPlaceholder;
     element.placeholder = translate(translationKey);
+  });
+
+  document.querySelectorAll('[data-i18n-aria-label]').forEach((element) => {
+    const translationKey = element.dataset.i18nAriaLabel;
+    element.setAttribute('aria-label', translate(translationKey));
   });
 
   const resultDefault = translate('resultDefault');
@@ -348,12 +373,32 @@ function updateQrCode() {
   }
 }
 
+function updateShareLinks() {
+  const pageUrl = window.location.href;
+  const encodedUrl = encodeURIComponent(pageUrl);
+  const encodedText = encodeURIComponent(`${translate('title')} - ${translate('intro')}`);
+  const links = {
+    'share-whatsapp': `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+    'share-facebook': `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+    'share-linkedin': `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+  };
+
+  Object.entries(links).forEach(([id, href]) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.href = href;
+      element.setAttribute('aria-label', `${element.textContent}: ${translate('title')}`);
+    }
+  });
+}
+
 function initializeLanguage() {
   if (languageSelector) {
     languageSelector.value = currentLanguage;
     languageSelector.addEventListener('change', (event) => {
       currentLanguage = event.target.value;
       applyTranslations();
+      updateShareLinks();
     });
   }
 }
@@ -366,4 +411,5 @@ window.addEventListener('load', () => {
   initializeLanguage();
   applyTranslations();
   updateQrCode();
+  updateShareLinks();
 });
