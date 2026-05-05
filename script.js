@@ -9,6 +9,8 @@ const languageSelector = document.getElementById('language-selector');
 const translations = {
   en: {
     pageTitle: 'NVC Practice',
+    htmlLang: 'en',
+    skipLink: 'Skip to main content',
     languageLabel: 'Language',
     title: 'Non-Violent Communication',
     intro: "Learn Marshall Rosenberg's NVC process and practice building compassionate, clear messages.",
@@ -57,6 +59,8 @@ const translations = {
   },
   fr: {
     pageTitle: 'Pratique CNV',
+    htmlLang: 'fr',
+    skipLink: 'Aller au contenu principal',
     languageLabel: 'Langue',
     title: 'Communication Non Violente',
     intro: "Apprenez le processus de CNV de Marshall Rosenberg et entraînez-vous à formuler des messages clairs et bienveillants.",
@@ -105,6 +109,8 @@ const translations = {
   },
   vi: {
     pageTitle: 'Luyện tập NVC',
+    htmlLang: 'vi',
+    skipLink: 'Bỏ qua đến nội dung chính',
     languageLabel: 'Ngôn ngữ',
     title: 'Giao tiếp Phi bạo lực',
     intro: 'Tìm hiểu quy trình NVC của Marshall Rosenberg và luyện tập tạo các thông điệp rõ ràng, cảm thông.',
@@ -153,6 +159,8 @@ const translations = {
   },
   de: {
     pageTitle: 'NVC Übung',
+    htmlLang: 'de',
+    skipLink: 'Zum Hauptinhalt springen',
     languageLabel: 'Sprache',
     title: 'Gewaltfreie Kommunikation',
     intro: 'Lerne Marshall Rosenbergs NVC-Prozess und übe mitfühlende, klare Botschaften zu formulieren.',
@@ -201,6 +209,8 @@ const translations = {
   },
   it: {
     pageTitle: 'Pratica NVC',
+    htmlLang: 'it',
+    skipLink: 'Vai al contenuto principale',
     languageLabel: 'Lingua',
     title: 'Comunicazione Non Violenta',
     intro: 'Scopri il processo NVC di Marshall Rosenberg e pratica a creare messaggi chiari e compassionevoli.',
@@ -250,6 +260,7 @@ const translations = {
 };
 
 let currentLanguage = 'en';
+const defaultResultTexts = Object.values(translations).map((translation) => translation.resultDefault);
 
 function translate(key) {
   return (translations[currentLanguage] && translations[currentLanguage][key]) || translations.en[key] || '';
@@ -257,6 +268,7 @@ function translate(key) {
 
 function applyTranslations() {
   document.title = translate('pageTitle');
+  document.documentElement.lang = translate('htmlLang');
   document.querySelectorAll('[data-i18n]').forEach((element) => {
     const translationKey = element.dataset.i18n;
     element.textContent = translate(translationKey);
@@ -273,9 +285,7 @@ function applyTranslations() {
   });
 
   const resultDefault = translate('resultDefault');
-  if (resultOutput.textContent === translations.en.resultDefault ||
-      resultOutput.textContent === translations.fr.resultDefault ||
-      resultOutput.textContent === translations.vi.resultDefault) {
+  if (defaultResultTexts.includes(resultOutput.textContent)) {
     resultOutput.textContent = resultDefault;
   }
 }
@@ -317,6 +327,15 @@ function updateQrCode() {
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.H,
       });
+      const qrImage = qrCodeContainer.querySelector('img');
+      const qrCanvas = qrCodeContainer.querySelector('canvas');
+      if (qrImage) {
+        qrImage.alt = translate('shareText');
+      }
+      if (qrCanvas) {
+        qrCanvas.setAttribute('role', 'img');
+        qrCanvas.setAttribute('aria-label', translate('shareText'));
+      }
     } else {
       qrCodeContainer.textContent = translate('qrUnavailable');
       qrCodeContainer.style.color = '#e2e8f0';
@@ -339,7 +358,10 @@ function initializeLanguage() {
   }
 }
 
-buildButton.addEventListener('click', buildStatement);
+document.getElementById('nvc-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  buildStatement();
+});
 window.addEventListener('load', () => {
   initializeLanguage();
   applyTranslations();

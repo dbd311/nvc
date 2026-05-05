@@ -1,35 +1,36 @@
 ---
 - name: Deploy NVC web app to remote server
   hosts: webservers
-  become: yes
   vars:
     app_name: nvc
     app_path: /var/www/nvc
-    node_packages:
-      - nodejs
-      - npm
+    app_port: 7000
   tasks:
-    - name: Ensure SSH known hosts are present
-      known_hosts:
-        name: "{{ ansible_host }}"
-        key: "{{ lookup('pipe', 'ssh-keyscan -H ' + ansible_host) }}"
-      delegate_to: localhost
-      run_once: true
+    - name: Check if Node.js is installed
+      shell: which node && node --version
+      register: node_check
+      ignore_errors: yes
 
-    - name: Ensure required packages are installed (Debian/Ubuntu)
-      apt:
-        name: "{{ node_packages }}"
-        state: present
-        update_cache: yes
-      when: ansible_os_family == 'Debian'
-
-    - name: Ensure required packages are installed (RedHat/CentOS)
-      yum:
-        name: "{{ node_packages }}"
-        state: present
-      when: ansible_os_family == 'RedHat'
+    - name: Install Node.js if not present
+      become: yes
+      block:
+        - name: Install Node.js from Ubuntu repository
+          apt:
+            name: nodejs
+            state: present
+          when: ansible_os_family == 'Debian' and node_check.failed
+        - name: Install Node.js from RedHat repository
+          dnf:
+            name: nodejs
+            state: present
+          when: ansible_os_family in ['RedHat', 'Rocky', 'Fedora'] and node_check.failed
+      rescue:
+        - name: Skip Node.js installation on error - let npm/code handle it
+          debug:
+            msg: "Skipping package manager, will attempt to use existing Node.js"
 
     - name: Ensure the application directory exists
+      become: yes
       file:
         path: "{{ app_path }}"
         state: directory
@@ -39,31 +40,77 @@
 
     - name: Synchronize application files to remote server
       synchronize:
-        src: "{{ playbook_dir }}/.."
+        src: "{{ playbook_dir }}/"
         dest: "{{ app_path }}"
-        delete: yes
+        delete: no
         rsync_opts:
           - '--exclude=.git'
           - '--exclude=node_modules'
           - '--exclude=ansible.cfg'
           - '--exclude=inventory.ini'
           - '--exclude=deploy.yml'
-      delegate_to: localhost
+          - '--exclude=.gitignore'
+          - '--exclude=.github'
+
+    - name: Fix permissions on app directory
+      become: yes
+      file:
+        path: "{{ app_path }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+        recurse: yes
 
     - name: Install npm dependencies
-      npm:
+      community.general.npm:
         path: "{{ app_path }}"
         production: yes
+      register: npm_install
+      retries: 3
+      delay: 10
+      until: npm_install is succeeded
+
+    - name: Check if PM2 is installed
+      shell: which pm2
+      register: pm2_check
+      ignore_errors: yes
 
     - name: Install PM2 globally
-      npm:
+      become: yes
+      community.general.npm:
         name: pm2
         global: yes
+      when: pm2_check.failed
+      register: pm2_install
+      retries: 2
+      delay: 5
+      until: pm2_install is succeeded
+
+    - name: Stop any existing PM2 process
+      shell: pm2 stop {{ app_name }} || true
+      args:
+        chdir: "{{ app_path }}"
+
+    - name: Delete any existing PM2 process
+      shell: pm2 delete {{ app_name }} || true
+      args:
+        chdir: "{{ app_path }}"
 
     - name: Start the app with PM2
-      shell: "pm2 start server.js --name {{ app_name }} --update-env || pm2 restart {{ app_name }}"
+      shell: PORT={{ app_port }} pm2 start server.js --name {{ app_name }} --env production
       args:
         chdir: "{{ app_path }}"
 
     - name: Save PM2 process list
+      become: yes
       shell: pm2 save
+
+    - name: Display deployment summary
+      debug:
+        msg:
+          - "NVC app deployed successfully!"
+          - "App location: {{ app_path }}"
+          - "Process name: {{ app_name }}"
+          - "App URL: http://{{ ansible_host }}:{{ app_port }}"
+          - "To check status: pm2 status"
+          - "To view logs: pm2 logs {{ app_name }}"
